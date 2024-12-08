@@ -1,0 +1,36 @@
+name: APIM deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  azure_deployment:
+    name: Azure Resource Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve Repository Code
+        uses: actions/checkout@v3
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Initialize Terraform Configuration
+        run: terraform init
+        working-directory: terraform
+
+      - name: Verify Terraform Configuration
+        run: terraform validate
+        working-directory: terraform
+
+      - name: Deploy Infrastructure with Terraform
+        run: terraform apply -auto-approve
+        working-directory: terraform
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
